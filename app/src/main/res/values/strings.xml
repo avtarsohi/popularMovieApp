@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">PoplularMovieApp</string>
+    <string name="sort_Popular_Movie_String">Order by popular movie</string>
+    <string name="sort_Hightest_Rated_Movie_String">Order by highest-rated</string>
+    <string name="error_message">An error has occurred. Please try again by clicking REFRESH</string>
+    <!--Used in overflow menu to refresh movie data-->
+    <string name="action_refresh">Refresh</string>
+    <!--Following string will be used in MovieDetail page-->
+    <string name="original_Title">Original Title:</string>
+    <string name="poster_Image">Poster Image:</string>
+    <string name="plot_Title">A plot synopsis:</string>
+    <string name="user_Rating">User Rating:  </string>
+    <string name="release_Date">Release Date:</string>
+    <!--API KEY FOR MOVIE DB-->
+    <string name="API_KEY">MOVIE_API_KEY</string>
+
+</resources>

@@ -1,0 +1,23 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.sohi.android.poplularmovieapp.MainActivity">
+    <item
+        android:id="@+id/action_refresh"
+        android:orderInCategory="1"
+        android:title="@string/action_refresh"
+        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/action_sort_onPolularMovie"
+        android:orderInCategory="100"
+        android:title="@string/sort_Popular_Movie_String"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_sort_onHighestRatedMovie"
+        android:orderInCategory="100"
+        android:title="@string/sort_Hightest_Rated_Movie_String"
+        app:showAsAction="never" />
+
+</menu>
