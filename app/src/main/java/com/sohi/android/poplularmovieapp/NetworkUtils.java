@@ -19,10 +19,10 @@ import static android.R.attr.apiKey;
 public class NetworkUtils {
     private static final String TAG = NetworkUtils.class.getSimpleName();
 
-    private static final String MOVIE_API_BASE_URL="http://api.themoviedb.org/3/";
-    private static final String POPLULAR_MOVIE_API_URL="http://api.themoviedb.org/3/movie/popular?api_key=";
-    private static final String TOP_RATED_MOVIE_API_URL="http://api.themoviedb.org/3/movie/top_rated?api_key=";
-    private static final String MOVIE_DETAIL_URL="http://api.themoviedb.org/3/movie/";
+    private static final String MOVIE_API_BASE_URL="https://api.themoviedb.org/3/";
+    private static final String POPLULAR_MOVIE_API_URL="https://api.themoviedb.org/3/movie/popular?api_key=";
+    private static final String TOP_RATED_MOVIE_API_URL="https://api.themoviedb.org/3/movie/top_rated?api_key=";
+    private static final String MOVIE_DETAIL_URL="https://api.themoviedb.org/3/movie/";
 
     /* The format we want our API to return */
     private static final String format = "json";

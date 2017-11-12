@@ -12,6 +12,6 @@
     <string name="user_Rating">User Rating:  </string>
     <string name="release_Date">Release Date:</string>
     <!--API KEY FOR MOVIE DB-->
-    <string name="API_KEY">MOVIE_API_KEY</string>
+    <string name="API_KEY">0e45bb65283dc35b4af6519298f1fd4e</string>
 
 </resources>
