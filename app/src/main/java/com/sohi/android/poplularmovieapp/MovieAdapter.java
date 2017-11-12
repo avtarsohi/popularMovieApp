@@ -20,6 +20,11 @@ import java.util.List;
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapterViewHolder> {
     private Context mContext;
     private List<MovieObj> movieObjs;
+    private final MovieAdapterOnClickHandler mClickHanlder;
+    public MovieAdapter(Context mContext, MovieAdapterOnClickHandler mClickHanlder) {
+        this.mContext = mContext;
+        this.mClickHanlder = mClickHanlder;
+    }
 
     public void setMovieObjs(List<MovieObj> movieObjs) {
         this.movieObjs = movieObjs;
@@ -28,7 +33,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
 
     @Override
     public MovieAdapterViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        Context context = parent.getContext();
+        Context context = mContext;
         int layoutIdForListItem = R.layout.image_item;
         LayoutInflater inflater = LayoutInflater.from(context);
         boolean shouldAttachToParentImmediately = false;
@@ -48,11 +53,17 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
         return this.movieObjs.size();
     }
 
-    public class MovieAdapterViewHolder extends RecyclerView.ViewHolder {
+    public interface MovieAdapterOnClickHandler {
+        void onMovieClick(MovieObj movieObj);
+    }
+
+    public class MovieAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public ImageView imageView;
         public MovieAdapterViewHolder(View itemView) {
             super(itemView);
             imageView = (ImageView)itemView.findViewById(R.id.imageView1);
+            imageView.setOnClickListener(this);
+            itemView.setOnClickListener(this);
         }
 
         public void bindData(int index){
@@ -60,6 +71,18 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
             Picasso.with(mContext).load(url.toString()).into(imageView);
             imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
             imageView.setAdjustViewBounds(true);
+        }
+
+        /**
+         * Called when a view has been clicked.
+         *
+         * @param v The view that was clicked.
+         */
+        @Override
+        public void onClick(View v) {
+            int adapterPosition = getAdapterPosition();
+            MovieObj movieObj = movieObjs.get(adapterPosition);
+            mClickHanlder.onMovieClick(movieObj);
         }
     }
 }

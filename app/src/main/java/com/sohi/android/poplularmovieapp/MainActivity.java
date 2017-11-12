@@ -2,66 +2,52 @@ package com.sohi.android.poplularmovieapp;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Movie;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.AdapterView;
-import android.widget.GridLayout;
 import android.widget.GridView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import com.sohi.android.poplularmovieapp.utils.SpacesItemDecoration;
 
 import java.net.URL;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-
-import static com.sohi.android.poplularmovieapp.NetworkUtils.getResponseFromHttpUrl;
-
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MovieAdapter.MovieAdapterOnClickHandler {
 
     private static final String POPLULAR_MOVIE_FILTER = "POPLULAR_MOVIE_FILTER";
     private static final String TOP_RATED_MOVIE_FILTER = "TOP_RATED_MOVIE_FILTER";
     private TextView mErrorMessageDisplay;
 
     private ProgressBar mLoadingIndicator;
-    private GridView mGridView;
-    private ImageAdapter mImageAdapter;
-    private Context context;
     private android.support.v7.widget.RecyclerView mRecyclerView;
-    private MovieAdapter mMovieAdapter;
+    public MovieAdapter mMovieAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.content_main);
+        setContentView(R.layout.activity_main);
         mRecyclerView = (android.support.v7.widget.RecyclerView)findViewById(R.id.recyclerview_movie);
 
-        setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        GridLayoutManager layoutManager = new GridLayoutManager(this,3);
-        mMovieAdapter = new MovieAdapter();
-
+        GridLayoutManager layoutManager = new GridLayoutManager(this, 3);
+        mMovieAdapter = new MovieAdapter(MainActivity.this, this);
         mRecyclerView.setAdapter(mMovieAdapter);
+        mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(layoutManager);
+        int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.spacing);
+        mRecyclerView.addItemDecoration(new SpacesItemDecoration(spacingInPixels));
+
 
         mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
         mErrorMessageDisplay = (TextView) findViewById(R.id.tv_error_message_display);
@@ -103,17 +89,17 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
        if(id==R.id.action_refresh){
-            mImageAdapter.setMovieObjs(null);
+            mMovieAdapter.setMovieObjs(null);
            LoadMovieData(POPLULAR_MOVIE_FILTER);
             return true;
         }
         else if(id ==R.id.action_sort_onPolularMovie) {
-           mImageAdapter.setMovieObjs(null);
+           mMovieAdapter.setMovieObjs(null);
            LoadMovieData(POPLULAR_MOVIE_FILTER);
            return true;
        }
        else if(id ==R.id.action_sort_onHighestRatedMovie) {
-           mImageAdapter.setMovieObjs(null);
+           mMovieAdapter.setMovieObjs(null);
            LoadMovieData(TOP_RATED_MOVIE_FILTER);
            return true;
        }
@@ -127,11 +113,20 @@ public class MainActivity extends AppCompatActivity {
         return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 
+    @Override
+    public void onMovieClick(MovieObj movieObj) {
+        Class movieDetailClass_Instance = MovieDetailActivity.class;
+        Intent intentToStartMovieDetailActivity = new Intent(MainActivity.this, movieDetailClass_Instance);
+        intentToStartMovieDetailActivity.putExtra("selectedMovieObject",movieObj);
+        startActivity(intentToStartMovieDetailActivity);
+    }
+
 
     public class FeatchMovieTask extends AsyncTask<String,Void, List<MovieObj>> {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            mRecyclerView.setVisibility(View.INVISIBLE);
             mLoadingIndicator.setVisibility(View.VISIBLE);
         }
 
@@ -177,11 +172,8 @@ public class MainActivity extends AppCompatActivity {
             mLoadingIndicator.setVisibility(View.INVISIBLE);
             if (movieObjs != null) {
                 showMovieDataView();
-
                 mMovieAdapter.setMovieObjs(movieObjs);
-                //mGridView.setAdapter(mImageAdapter);
-                mMovieAdapter.notifyDataSetChanged();
-                //mForecastAdapter.setWeatherData(weatherData);
+                mRecyclerView.getLayoutManager().scrollToPosition(0);
             } else {
                 showErrorMessage();
             }
