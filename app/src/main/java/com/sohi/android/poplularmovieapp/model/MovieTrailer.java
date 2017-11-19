@@ -1,10 +1,12 @@
 package com.sohi.android.poplularmovieapp.model;
 
+import java.io.Serializable;
+
 /**
  * Created by siav on 11/18/17.
  */
 
-public class MovieTrailer {
+public class MovieTrailer implements Serializable {
     private int counter;
     private String Id;
     private String Key;

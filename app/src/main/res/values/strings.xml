@@ -16,5 +16,6 @@
     <string name="trailers">Trailers:</string>
     <string name="reviews">Reviews:</string>
     <string name="no_movie_available_txt">No review available for this movie</string>
+    <string name="show_my_favorite_movie_list">Show my favorite movie list</string>
 
 </resources>

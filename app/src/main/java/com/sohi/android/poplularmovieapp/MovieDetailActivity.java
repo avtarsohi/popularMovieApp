@@ -1,6 +1,9 @@
 package com.sohi.android.poplularmovieapp;
 
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
@@ -17,8 +20,12 @@ import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.appindexing.Thing;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.sohi.android.poplularmovieapp.adapter.ReviewAdapter;
 import com.sohi.android.poplularmovieapp.adapter.TrailerAdapter;
+import com.sohi.android.poplularmovieapp.data.FavMovieContract;
+import com.sohi.android.poplularmovieapp.data.FavMovieDbHelper;
 import com.sohi.android.poplularmovieapp.model.MovieObj;
 import com.sohi.android.poplularmovieapp.model.MovieReview;
 import com.sohi.android.poplularmovieapp.model.MovieTrailer;
@@ -51,6 +58,7 @@ public class MovieDetailActivity extends AppCompatActivity implements TrailerAda
     private TrailerAdapter mTrailerAdapter;
     private boolean isReviewLoaded;
     private boolean isTrailerLoaded;
+    private SQLiteDatabase mDb;
 
 
     @Override
@@ -64,11 +72,17 @@ public class MovieDetailActivity extends AppCompatActivity implements TrailerAda
         if (intent != null && intent.hasExtra("selectedMovieObject")) {
             selectedObject = (MovieObj) intent.getExtras().getSerializable("selectedMovieObject");
             displayMovieObject();
+            setUpDB();
         }
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+    }
+
+    private void setUpDB() {
+        FavMovieDbHelper dbHelper = new FavMovieDbHelper(this);
+        mDb = dbHelper.getWritableDatabase();
     }
 
     private void displayMovieObject() {
@@ -158,6 +172,21 @@ public class MovieDetailActivity extends AppCompatActivity implements TrailerAda
         intent.setData(Uri.parse(url));
         startActivity(intent);
     }
+
+    public void onFavClick(View view) {
+        if(selectedObject != null){
+            Gson gson = new Gson();
+            ContentValues values = new ContentValues();
+            values.put(FavMovieContract.FavMovieEntry.COLUMN_FAVMOVIEOBJ,
+                    gson.toJson(selectedObject).getBytes());
+
+            mDb.insert(FavMovieContract.FavMovieEntry.TABLE_NAME, null, values);
+
+
+        }
+    }
+
+
 
     public class FeatchMovieReviewList extends AsyncTask<Void, Void, Void> {
 

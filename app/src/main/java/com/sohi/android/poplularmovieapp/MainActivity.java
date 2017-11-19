@@ -2,6 +2,8 @@ package com.sohi.android.poplularmovieapp;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -16,11 +18,16 @@ import android.widget.GridView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.sohi.android.poplularmovieapp.adapter.MovieAdapter;
+import com.sohi.android.poplularmovieapp.data.FavMovieContract;
+import com.sohi.android.poplularmovieapp.data.FavMovieDbHelper;
 import com.sohi.android.poplularmovieapp.model.MovieObj;
 import com.sohi.android.poplularmovieapp.utils.SpacesItemDecoration;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements MovieAdapter.MovieAdapterOnClickHandler {
@@ -28,7 +35,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     private static final String POPLULAR_MOVIE_FILTER = "POPLULAR_MOVIE_FILTER";
     private static final String TOP_RATED_MOVIE_FILTER = "TOP_RATED_MOVIE_FILTER";
     private TextView mErrorMessageDisplay;
-
+    private SQLiteDatabase mDb;
     private ProgressBar mLoadingIndicator;
     private android.support.v7.widget.RecyclerView mRecyclerView;
     public MovieAdapter mMovieAdapter;
@@ -53,8 +60,13 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
         mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
         mErrorMessageDisplay = (TextView) findViewById(R.id.tv_error_message_display);
-
+        setUpDB();
         LoadMovieData(POPLULAR_MOVIE_FILTER);
+    }
+
+    private void setUpDB() {
+        FavMovieDbHelper dbHelper = new FavMovieDbHelper(this);
+        mDb = dbHelper.getWritableDatabase();
     }
 
     private void LoadMovieData(String filter)
@@ -105,8 +117,40 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
            LoadMovieData(TOP_RATED_MOVIE_FILTER);
            return true;
        }
+       else if(id ==R.id.action_show_onFavMovies) {
+           LoadMoviesFromLocalDB();
+           return true;
+       }
         return super.onOptionsItemSelected(item);
     }
+
+    private void LoadMoviesFromLocalDB() {
+        Cursor cursor = getAllFavMovieObject();
+        List<MovieObj> movieObjs = new ArrayList<>();
+        while (cursor.moveToNext()) {
+            byte[] blob = cursor.getBlob(cursor.getColumnIndex(FavMovieContract.FavMovieEntry.COLUMN_FAVMOVIEOBJ));
+            String json = new String(blob);
+            Gson gson = new Gson();
+            MovieObj movieObject = gson.fromJson(json, new TypeToken<MovieObj>(){}.getType());
+            movieObjs.add(movieObject);
+        }
+        mMovieAdapter.setMovieObjs(null);
+        mMovieAdapter.setMovieObjs(movieObjs);
+        mMovieAdapter.notifyDataSetChanged();
+    }
+
+        private Cursor getAllFavMovieObject() {
+        return mDb.query(
+                FavMovieContract.FavMovieEntry.TABLE_NAME,
+                null,
+                null,
+                null,
+                null,
+                null,
+                FavMovieContract.FavMovieEntry.COLUMN_TIMESTAMP
+        );
+    }
+
 
     private boolean isOnline() {
         ConnectivityManager cm =

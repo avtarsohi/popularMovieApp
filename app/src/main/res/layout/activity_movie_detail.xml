@@ -32,12 +32,19 @@ android:layout_height="match_parent">
         <View style="@style/movie_details_line_seperator_style" />
 
         <LinearLayout
+            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
             <ImageView
                 android:id="@+id/poster_Image"
                 style="@style/image_style" />
+            <Button
+                android:clickable="true"
+                android:text="Add To Fav"
+                android:onClick="onFavClick"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
         </LinearLayout>
 
 

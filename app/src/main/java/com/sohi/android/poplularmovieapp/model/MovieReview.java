@@ -1,10 +1,12 @@
 package com.sohi.android.poplularmovieapp.model;
 
+import java.io.Serializable;
+
 /**
  * Created by siav on 11/18/17.
  */
 
-public class MovieReview {
+public class MovieReview implements Serializable {
     public String Id;
 
     public String getId() {
