@@ -13,5 +13,8 @@
     <string name="release_Date">Release Date:</string>
     <!--API KEY FOR MOVIE DB-->
     <string name="API_KEY">0e45bb65283dc35b4af6519298f1fd4e</string>
+    <string name="trailers">Trailers:</string>
+    <string name="reviews">Reviews:</string>
+    <string name="no_movie_available_txt">No review available for this movie</string>
 
 </resources>

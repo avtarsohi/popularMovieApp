@@ -16,6 +16,8 @@ import android.widget.GridView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.sohi.android.poplularmovieapp.adapter.MovieAdapter;
+import com.sohi.android.poplularmovieapp.model.MovieObj;
 import com.sohi.android.poplularmovieapp.utils.SpacesItemDecoration;
 
 import java.net.URL;
