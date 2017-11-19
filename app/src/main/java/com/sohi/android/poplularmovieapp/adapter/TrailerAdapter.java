@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+
 import android.widget.TextView;
 
 import com.sohi.android.poplularmovieapp.R;
@@ -74,7 +75,6 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerA
             textView.setOnClickListener(this);
             itemView.setOnClickListener(this);
             imageView.setOnClickListener(this);
-
         }
 
         public void bindData(int index){
