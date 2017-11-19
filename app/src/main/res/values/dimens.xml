@@ -3,6 +3,8 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
-    <dimen name="spacing">8dp</dimen>
+    <dimen name="spacing">2dp</dimen>
     <dimen name="minMargin">5dp</dimen>
+    <dimen name="movie_Details_Row_Padding">4dp</dimen>
+    <dimen name="app_details_header_text_size">22sp</dimen>
 </resources>

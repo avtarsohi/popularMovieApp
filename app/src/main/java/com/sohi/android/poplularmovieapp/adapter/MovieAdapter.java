@@ -1,4 +1,4 @@
-package com.sohi.android.poplularmovieapp;
+package com.sohi.android.poplularmovieapp.adapter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -8,6 +8,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ListView;
 
+import com.sohi.android.poplularmovieapp.NetworkUtils;
+import com.sohi.android.poplularmovieapp.R;
+import com.sohi.android.poplularmovieapp.model.MovieObj;
 import com.squareup.picasso.Picasso;
 
 import java.net.URL;

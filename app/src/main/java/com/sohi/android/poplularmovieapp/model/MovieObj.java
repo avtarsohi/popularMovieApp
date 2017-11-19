@@ -1,7 +1,11 @@
-package com.sohi.android.poplularmovieapp;
+package com.sohi.android.poplularmovieapp.model;
+
+import com.sohi.android.poplularmovieapp.model.MovieReview;
+import com.sohi.android.poplularmovieapp.model.MovieTrailer;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 import static android.R.attr.rating;
 
@@ -15,6 +19,26 @@ public class MovieObj implements Serializable{
     A plot synopsis (called overview in the api)
     user rating (called vote_average in the api)
     release date*/
+
+    public List<MovieReview> getReviewList() {
+        return reviewList;
+    }
+
+    public List<MovieTrailer> getTrailerLists() {
+        return trailerLists;
+    }
+
+    private List<MovieReview> reviewList;
+
+    public void setReviewList(List<MovieReview> reviewList) {
+        this.reviewList = reviewList;
+    }
+
+    public void setTrailerLists(List<MovieTrailer> trailerLists) {
+        this.trailerLists = trailerLists;
+    }
+
+    private List<MovieTrailer> trailerLists;
 
     public String getOrignal_title() {
         return orignal_title;
@@ -90,4 +114,5 @@ public class MovieObj implements Serializable{
     }
 
     private float popularity;
+
 }

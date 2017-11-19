@@ -2,27 +2,36 @@ package com.sohi.android.poplularmovieapp;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.appindexing.Thing;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.sohi.android.poplularmovieapp.adapter.ReviewAdapter;
+import com.sohi.android.poplularmovieapp.adapter.TrailerAdapter;
+import com.sohi.android.poplularmovieapp.model.MovieObj;
+import com.sohi.android.poplularmovieapp.model.MovieReview;
+import com.sohi.android.poplularmovieapp.model.MovieTrailer;
 import com.squareup.picasso.Picasso;
-
-import org.w3c.dom.Text;
 
 import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MovieDetailActivity extends AppCompatActivity {
+public class MovieDetailActivity extends AppCompatActivity implements TrailerAdapter.TrailerAdapterOnClickHandler {
 
     private MovieObj selectedObject;
 
@@ -31,8 +40,17 @@ public class MovieDetailActivity extends AppCompatActivity {
     @BindView(R.id.user_Rating_Text) TextView mUserRating;
     @BindView(R.id.release_date_Text) TextView mReleaseDate;
     @BindView(R.id.poster_Image) ImageView  mMoviePosterImage;
+    @BindView(R.id.tv_error_message_display) TextView mErrorMessageDisplay;
+    @BindView(R.id.pb_loading_indicator) ProgressBar mLoadingIndicator;
+    @BindView(R.id.recyclerview_reviews) RecyclerView  mReviewRecyclerView;
+    @BindView(R.id.trailerview_reviews) RecyclerView  mTrailerRecyclerView;
+    @BindView(R.id.movie_detail_panel) ScrollView mMovieDetailPanel;
 
     private GoogleApiClient client;
+    private ReviewAdapter mReviewAdapter;
+    private TrailerAdapter mTrailerAdapter;
+    private boolean isReviewLoaded;
+    private boolean isTrailerLoaded;
 
 
     @Override
@@ -56,6 +74,11 @@ public class MovieDetailActivity extends AppCompatActivity {
     private void displayMovieObject() {
         try {
             if (selectedObject != null) {
+                showLoadingView();
+                bindAdapter();
+                new FeatchMovieReviewList().execute();
+                new FeatchMovieTrailerDetails().execute();
+
                 mOrignalTitle.setText(selectedObject.getOrignal_title());
                 mUserRating.setText(String.valueOf(selectedObject.getRating()));
                 mPlotSynopsis.setText(selectedObject.getOverview());
@@ -70,13 +93,46 @@ public class MovieDetailActivity extends AppCompatActivity {
                 Picasso.with(this).load(url.toString()).into(mMoviePosterImage);
                 mMoviePosterImage.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
                 mMoviePosterImage.setAdjustViewBounds(true);
-
             }
         } catch (Exception ex) {
+            mErrorMessageDisplay.setVisibility(View.VISIBLE);
             ex.printStackTrace();
         }
+    }
 
+    private void showLoadingView() {
+        isReviewLoaded = false;
+        isTrailerLoaded = false;
+        mErrorMessageDisplay.setVisibility(View.INVISIBLE);
+        mMovieDetailPanel.setVisibility(View.INVISIBLE);
+        mLoadingIndicator.setVisibility(View.VISIBLE);
+    }
 
+    private void HideLoadingView() {
+        if(isReviewLoaded && isTrailerLoaded) {
+            mErrorMessageDisplay.setVisibility(View.INVISIBLE);
+            mMovieDetailPanel.setVisibility(View.VISIBLE);
+            mLoadingIndicator.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    private void bindAdapter() {
+
+        //Review Adapter binding
+        LinearLayoutManager review_layoutManager
+                = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        mReviewRecyclerView.setLayoutManager(review_layoutManager);
+        mReviewRecyclerView.setHasFixedSize(true);
+        mReviewAdapter = new ReviewAdapter(this);
+        mReviewRecyclerView.setAdapter(mReviewAdapter);
+
+        //Trailer Adapter binding
+        LinearLayoutManager trailer_layoutManager
+                = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        mTrailerRecyclerView.setLayoutManager(trailer_layoutManager);
+        mTrailerRecyclerView.setHasFixedSize(true);
+        mTrailerAdapter = new TrailerAdapter(MovieDetailActivity.this, this);
+        mTrailerRecyclerView.setAdapter(mTrailerAdapter);
     }
 
     /**
@@ -93,6 +149,107 @@ public class MovieDetailActivity extends AppCompatActivity {
                 .setObject(object)
                 .setActionStatus(Action.STATUS_TYPE_COMPLETED)
                 .build();
+    }
+
+    @Override
+    public void onURLClick(MovieTrailer trailer) {
+        String url = trailer.getYoutubeURL();
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(Uri.parse(url));
+        startActivity(intent);
+    }
+
+    public class FeatchMovieReviewList extends AsyncTask<Void, Void, Void> {
+
+        /**
+         * Override this method to perform a computation on a background thread. The
+         * specified parameters are the parameters passed to {@link #execute}
+         * by the caller of this task.
+         * <p>
+         * This method can call {@link #publishProgress} to publish updates
+         * on the UI thread.
+         *
+         * @param params The parameters of the task.
+         * @return A result, defined by the subclass of this task.
+         * @see #onPreExecute()
+         * @see #onPostExecute
+         * @see #publishProgress
+         */
+        @Override
+        protected Void doInBackground(Void... params) {
+            String jsonMovieResponse = "";
+            try {
+                //fetch movie reviews
+                URL movieReviewsUrl = NetworkUtils.buildUrlForMoviesReviews(getString(R.string.API_KEY),
+                        String.valueOf(selectedObject.getMovie_id()));
+                jsonMovieResponse = NetworkUtils.getResponseFromHttpUrl(movieReviewsUrl);
+                List<MovieReview> list = OpenMovieJsonUtils.getReviewListFromJsonString(jsonMovieResponse);
+                //handle no review case
+                if(list.size() == 0)
+                {
+                    MovieReview emptyReview = new MovieReview();
+                    emptyReview.setContent(getString(R.string.no_movie_available_txt));
+                    list.add(emptyReview);
+                }
+                selectedObject.setReviewList(list);
+                mReviewAdapter.setReviewObjs(selectedObject.getReviewList());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            mReviewAdapter.notifyDataSetChanged();
+            isReviewLoaded = true;
+            HideLoadingView();
+            mReviewRecyclerView.invalidate();
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+        }
+    }
+
+    public class FeatchMovieTrailerDetails extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            // mRecyclerView.setVisibility(View.INVISIBLE);
+            //mLoadingIndicator.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+
+            String jsonMovieResponse = "";
+            try {
+                //fetch movie reviews
+                URL movieReviewsUrl = NetworkUtils.buildUrlForMovieTrailerKey(getString(R.string.API_KEY),
+                        String.valueOf(selectedObject.getMovie_id()));
+                jsonMovieResponse = NetworkUtils.getResponseFromHttpUrl(movieReviewsUrl);
+                selectedObject.setTrailerLists(OpenMovieJsonUtils.getTrailerListFromJsonString(jsonMovieResponse));
+                mTrailerAdapter.setTrailerObjs(selectedObject.getTrailerLists());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            mTrailerAdapter.notifyDataSetChanged();
+            isTrailerLoaded = true;
+            HideLoadingView();
+            mTrailerRecyclerView.invalidate();
+        }
     }
 
     @Override
@@ -114,4 +271,6 @@ public class MovieDetailActivity extends AppCompatActivity {
         AppIndex.AppIndexApi.end(client, getIndexApiAction());
         client.disconnect();
     }
+
+
 }

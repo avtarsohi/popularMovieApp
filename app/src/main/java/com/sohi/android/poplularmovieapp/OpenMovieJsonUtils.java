@@ -2,6 +2,10 @@ package com.sohi.android.poplularmovieapp;
 
 import android.content.Context;
 
+import com.sohi.android.poplularmovieapp.model.MovieObj;
+import com.sohi.android.poplularmovieapp.model.MovieReview;
+import com.sohi.android.poplularmovieapp.model.MovieTrailer;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -21,6 +25,53 @@ import static android.R.attr.format;
  */
 
 public class OpenMovieJsonUtils {
+
+    public static List<MovieReview> getReviewListFromJsonString(String inputJsonStr)
+            throws JSONException {
+        List<MovieReview> reviewLists = new ArrayList<>();
+        final String OWM_LIST = "results";
+
+        JSONObject movieJson = new JSONObject(inputJsonStr);
+
+        JSONArray reviewsArray = movieJson.getJSONArray(OWM_LIST);
+
+        for (int i = 0; i < reviewsArray.length(); i++) {
+            MovieReview rev = new MovieReview();
+
+            /* Get the JSON object representing the movie */
+            JSONObject movieObj = reviewsArray.getJSONObject(i);
+            rev.setId(movieObj.getString("id"));
+            rev.setContent(movieObj.getString("content"));
+
+            reviewLists.add(rev);
+        }
+
+        return reviewLists;
+    }
+
+    public static List<MovieTrailer> getTrailerListFromJsonString(String inputJsonStr)
+            throws JSONException {
+        List<MovieTrailer> trailerLists = new ArrayList<>();
+        final String OWM_LIST = "results";
+
+        JSONObject movieJson = new JSONObject(inputJsonStr);
+
+        JSONArray trailerArray = movieJson.getJSONArray(OWM_LIST);
+
+        for (int i = 0; i < trailerArray.length(); i++) {
+            MovieTrailer rev = new MovieTrailer(i);
+
+            /* Get the JSON object representing the movie */
+            JSONObject movieObj = trailerArray.getJSONObject(i);
+            rev.setId(movieObj.getString("id"));
+            rev.setKey(movieObj.getString("key"));
+
+            trailerLists.add(rev);
+        }
+
+        return trailerLists;
+    }
+
     public static List<MovieObj> getSimpleMovieStringsFromJson(Context context, String inputJsonStr)
             throws JSONException {
 

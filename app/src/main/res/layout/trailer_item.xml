@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal" android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/trailerItemText"
+        style="@style/movie_details_textstyle"
+        android:textColor="#3498db"
+        android:fontFamily="sans-serif-medium"
+         />
+    <ImageButton
+        android:id="@+id/play_trailer"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:paddingTop="@dimen/movie_Details_Row_Padding"
+        android:paddingBottom="@dimen/movie_Details_Row_Padding"
+          />
+</LinearLayout>
+
+
