@@ -5,65 +5,83 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
-import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.os.PersistableBundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.ScrollView;
+import android.widget.ShareActionProvider;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.appindexing.Thing;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.sohi.android.poplularmovieapp.adapter.ReviewAdapter;
 import com.sohi.android.poplularmovieapp.adapter.TrailerAdapter;
 import com.sohi.android.poplularmovieapp.data.FavMovieContract;
 import com.sohi.android.poplularmovieapp.data.FavMovieDbHelper;
 import com.sohi.android.poplularmovieapp.model.MovieObj;
-import com.sohi.android.poplularmovieapp.model.MovieReview;
 import com.sohi.android.poplularmovieapp.model.MovieTrailer;
+import com.sohi.android.poplularmovieapp.utils.NetworkUtils;
 import com.squareup.picasso.Picasso;
 
 import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class MovieDetailActivity extends AppCompatActivity implements TrailerAdapter.TrailerAdapterOnClickHandler {
 
+    @BindView(R.id.original_Title_Text)
+    TextView mOrignalTitle;
+    @BindView(R.id.plot_synopsis_Text)
+    TextView mPlotSynopsis;
+    @BindView(R.id.user_Rating_Text)
+    TextView mUserRating;
+    @BindView(R.id.release_date_Text)
+    TextView mReleaseDate;
+    @BindView(R.id.poster_Image)
+    ImageView mMoviePosterImage;
+    @BindView(R.id.recyclerview_reviews)
+    RecyclerView mReviewRecyclerView;
+    @BindView(R.id.trailerview_reviews)
+    RecyclerView mTrailerRecyclerView;
+    @BindView(R.id.movie_detail_panel)
+    ScrollView mMovieDetailPanel;
+    @BindView(R.id.addToFavBtn)
+    AppCompatButton mFavMovieClickButton;
+    @BindView(R.id.favorite_button)
+    ImageButton starIcon;
+
+
     private MovieObj selectedObject;
-
-    @BindView(R.id.original_Title_Text) TextView mOrignalTitle;
-    @BindView(R.id.plot_synopsis_Text) TextView mPlotSynopsis;
-    @BindView(R.id.user_Rating_Text) TextView mUserRating;
-    @BindView(R.id.release_date_Text) TextView mReleaseDate;
-    @BindView(R.id.poster_Image) ImageView  mMoviePosterImage;
-    @BindView(R.id.tv_error_message_display) TextView mErrorMessageDisplay;
-    @BindView(R.id.pb_loading_indicator) ProgressBar mLoadingIndicator;
-    @BindView(R.id.recyclerview_reviews) RecyclerView  mReviewRecyclerView;
-    @BindView(R.id.trailerview_reviews) RecyclerView  mTrailerRecyclerView;
-    @BindView(R.id.movie_detail_panel) ScrollView mMovieDetailPanel;
-
     private GoogleApiClient client;
     private ReviewAdapter mReviewAdapter;
     private TrailerAdapter mTrailerAdapter;
     private boolean isReviewLoaded;
     private boolean isTrailerLoaded;
     private SQLiteDatabase mDb;
+    private ShareActionProvider mShareActionProvider;
+    //First trailer for share
+    private MovieTrailer mTrailer;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         //initialize
         setContentView(R.layout.activity_movie_detail);
         ButterKnife.bind(this);
@@ -71,8 +89,10 @@ public class MovieDetailActivity extends AppCompatActivity implements TrailerAda
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra("selectedMovieObject")) {
             selectedObject = (MovieObj) intent.getExtras().getSerializable("selectedMovieObject");
-            displayMovieObject();
             setUpDB();
+            displayMovieObject();
+            //scroll to top
+            mMovieDetailPanel.scrollTo(0,0);
         }
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -88,46 +108,71 @@ public class MovieDetailActivity extends AppCompatActivity implements TrailerAda
     private void displayMovieObject() {
         try {
             if (selectedObject != null) {
-                showLoadingView();
                 bindAdapter();
-                new FeatchMovieReviewList().execute();
-                new FeatchMovieTrailerDetails().execute();
 
                 mOrignalTitle.setText(selectedObject.getOrignal_title());
                 mUserRating.setText(String.valueOf(selectedObject.getRating()));
                 mPlotSynopsis.setText(selectedObject.getOverview());
 
-                //Convert date in a more user readable form
-                SimpleDateFormat formater = new SimpleDateFormat("M/d/yyyy");
-                String datestring = formater.format(selectedObject.getRelease_date());
-                mReleaseDate.setText(datestring);
+                setReleaseDate();
+                setPosterImage();
 
-                URL url = NetworkUtils.buildUrlForMoviePosterMedium(selectedObject.getPoster_url());
-
-                Picasso.with(this).load(url.toString()).into(mMoviePosterImage);
-                mMoviePosterImage.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-                mMoviePosterImage.setAdjustViewBounds(true);
+                if (isFavMovie()) {
+                    removeFavButton();
+                }
             }
         } catch (Exception ex) {
-            mErrorMessageDisplay.setVisibility(View.VISIBLE);
             ex.printStackTrace();
         }
     }
 
-    private void showLoadingView() {
-        isReviewLoaded = false;
-        isTrailerLoaded = false;
-        mErrorMessageDisplay.setVisibility(View.INVISIBLE);
-        mMovieDetailPanel.setVisibility(View.INVISIBLE);
-        mLoadingIndicator.setVisibility(View.VISIBLE);
+    private void setPosterImage() {
+        URL url = NetworkUtils.buildUrlForMovieDetailsPosterLarge(selectedObject.getPoster_url());
+
+        Picasso.with(this).load(url.toString()).into(mMoviePosterImage, new com.squareup.picasso.Callback() {
+            @Override
+            public void onSuccess() {
+                mMovieDetailPanel.scrollTo(0,0);
+            }
+
+            @Override
+            public void onError() {
+
+            }
+        });
+        mMoviePosterImage.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+        mMoviePosterImage.setAdjustViewBounds(true);
     }
 
-    private void HideLoadingView() {
-        if(isReviewLoaded && isTrailerLoaded) {
-            mErrorMessageDisplay.setVisibility(View.INVISIBLE);
-            mMovieDetailPanel.setVisibility(View.VISIBLE);
-            mLoadingIndicator.setVisibility(View.INVISIBLE);
+    private void setReleaseDate() {
+        //Convert date in a more user readable form
+        SimpleDateFormat formater = new SimpleDateFormat("M/d/yyyy");
+        String datestring = formater.format(selectedObject.getRelease_date());
+        mReleaseDate.setText(datestring);
+    }
+
+    private boolean isFavMovie() {
+        Cursor cursor = getAllFavMovieId();
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                String id = cursor.getString(cursor.getColumnIndex(FavMovieContract.FavMovieEntry.COLUMN_FAVMOVIEID));
+                if (id.equals(String.valueOf(selectedObject.getMovie_id())))
+                    return true;
+            }
         }
+        return false;
+    }
+
+    private Cursor getAllFavMovieId() {
+        return mDb.query(
+                FavMovieContract.FavMovieEntry.TABLE_NAME,
+                null,
+                null,
+                null,
+                null,
+                null,
+                FavMovieContract.FavMovieEntry.COLUMN_TIMESTAMP
+        );
     }
 
     private void bindAdapter() {
@@ -139,6 +184,7 @@ public class MovieDetailActivity extends AppCompatActivity implements TrailerAda
         mReviewRecyclerView.setHasFixedSize(true);
         mReviewAdapter = new ReviewAdapter(this);
         mReviewRecyclerView.setAdapter(mReviewAdapter);
+        mReviewAdapter.setReviewObjs(selectedObject.getReviewList());
 
         //Trailer Adapter binding
         LinearLayoutManager trailer_layoutManager
@@ -147,6 +193,8 @@ public class MovieDetailActivity extends AppCompatActivity implements TrailerAda
         mTrailerRecyclerView.setHasFixedSize(true);
         mTrailerAdapter = new TrailerAdapter(MovieDetailActivity.this, this);
         mTrailerRecyclerView.setAdapter(mTrailerAdapter);
+        mTrailerAdapter.setTrailerObjs(selectedObject.getTrailerLists());
+
     }
 
     /**
@@ -173,111 +221,58 @@ public class MovieDetailActivity extends AppCompatActivity implements TrailerAda
         startActivity(intent);
     }
 
-    public void onFavClick(View view) {
-        if(selectedObject != null){
-            Gson gson = new Gson();
-            ContentValues values = new ContentValues();
-            values.put(FavMovieContract.FavMovieEntry.COLUMN_FAVMOVIEOBJ,
-                    gson.toJson(selectedObject).getBytes());
-
-            mDb.insert(FavMovieContract.FavMovieEntry.TABLE_NAME, null, values);
-
-
-        }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_movie_detail, menu);
+        return true;
     }
 
-
-
-    public class FeatchMovieReviewList extends AsyncTask<Void, Void, Void> {
-
-        /**
-         * Override this method to perform a computation on a background thread. The
-         * specified parameters are the parameters passed to {@link #execute}
-         * by the caller of this task.
-         * <p>
-         * This method can call {@link #publishProgress} to publish updates
-         * on the UI thread.
-         *
-         * @param params The parameters of the task.
-         * @return A result, defined by the subclass of this task.
-         * @see #onPreExecute()
-         * @see #onPostExecute
-         * @see #publishProgress
-         */
-        @Override
-        protected Void doInBackground(Void... params) {
-            String jsonMovieResponse = "";
-            try {
-                //fetch movie reviews
-                URL movieReviewsUrl = NetworkUtils.buildUrlForMoviesReviews(getString(R.string.API_KEY),
-                        String.valueOf(selectedObject.getMovie_id()));
-                jsonMovieResponse = NetworkUtils.getResponseFromHttpUrl(movieReviewsUrl);
-                List<MovieReview> list = OpenMovieJsonUtils.getReviewListFromJsonString(jsonMovieResponse);
-                //handle no review case
-                if(list.size() == 0)
-                {
-                    MovieReview emptyReview = new MovieReview();
-                    emptyReview.setContent(getString(R.string.no_movie_available_txt));
-                    list.add(emptyReview);
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.share_trailer:
+                if(selectedObject.getTrailerLists() != null &&
+                        selectedObject.getTrailerLists().size() > 0) {
+                    Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                    shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+                    shareIntent.setType("text/plain");
+                    shareIntent.putExtra(Intent.EXTRA_TEXT, selectedObject.getOrignal_title() + " " +
+                            selectedObject.getTrailerLists().get(0).getYoutubeURL());
+                    startActivity(shareIntent);
+                    return true;
                 }
-                selectedObject.setReviewList(list);
-                mReviewAdapter.setReviewObjs(selectedObject.getReviewList());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            return null;
         }
 
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            mReviewAdapter.notifyDataSetChanged();
-            isReviewLoaded = true;
-            HideLoadingView();
-            mReviewRecyclerView.invalidate();
-        }
+        return super.onOptionsItemSelected(item);
+    }
 
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
+
+    public void onFavClick(View view) {
+        if (selectedObject != null) {
+            selectedObject.setAddedToFavMovieList(true);
+            removeFavButton();
+            addToFavMovieDB();
+            Toast.makeText(getApplicationContext(), R.string.movie_added_to_DB_message, Toast.LENGTH_LONG).show();
         }
     }
 
-    public class FeatchMovieTrailerDetails extends AsyncTask<Void, Void, Void> {
+    private void addToFavMovieDB() {
+        Gson gson = new Gson();
+        ContentValues values = new ContentValues();
+        values.put(FavMovieContract.FavMovieEntry.COLUMN_FAVMOVIEOBJ,
+                gson.toJson(selectedObject).getBytes());
+        values.put(FavMovieContract.FavMovieEntry.COLUMN_FAVMOVIEID,
+                selectedObject.getMovie_id());
 
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            // mRecyclerView.setVisibility(View.INVISIBLE);
-            //mLoadingIndicator.setVisibility(View.VISIBLE);
-        }
+        mDb.insert(FavMovieContract.FavMovieEntry.TABLE_NAME, null, values);
+    }
 
-        @Override
-        protected Void doInBackground(Void... params) {
-
-            String jsonMovieResponse = "";
-            try {
-                //fetch movie reviews
-                URL movieReviewsUrl = NetworkUtils.buildUrlForMovieTrailerKey(getString(R.string.API_KEY),
-                        String.valueOf(selectedObject.getMovie_id()));
-                jsonMovieResponse = NetworkUtils.getResponseFromHttpUrl(movieReviewsUrl);
-                selectedObject.setTrailerLists(OpenMovieJsonUtils.getTrailerListFromJsonString(jsonMovieResponse));
-                mTrailerAdapter.setTrailerObjs(selectedObject.getTrailerLists());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            mTrailerAdapter.notifyDataSetChanged();
-            isTrailerLoaded = true;
-            HideLoadingView();
-            mTrailerRecyclerView.invalidate();
+    private void removeFavButton() {
+        ViewGroup layout = (ViewGroup) mFavMovieClickButton.getParent();
+        if (null != layout) {
+            layout.removeView(mFavMovieClickButton);
+            starIcon.setVisibility(View.VISIBLE);
         }
     }
 
@@ -300,6 +295,4 @@ public class MovieDetailActivity extends AppCompatActivity implements TrailerAda
         AppIndex.AppIndexApi.end(client, getIndexApiAction());
         client.disconnect();
     }
-
-
 }

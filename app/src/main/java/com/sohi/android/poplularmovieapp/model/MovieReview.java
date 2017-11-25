@@ -8,6 +8,7 @@ import java.io.Serializable;
 
 public class MovieReview implements Serializable {
     public String Id;
+    public String Content;
 
     public String getId() {
         return Id;
@@ -24,6 +25,4 @@ public class MovieReview implements Serializable {
     public void setContent(String content) {
         Content = content;
     }
-
-    public String Content;
 }

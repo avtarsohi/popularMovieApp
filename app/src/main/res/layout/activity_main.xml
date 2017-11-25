@@ -7,9 +7,10 @@
     android:fitsSystemWindows="true"
     tools:context="com.sohi.android.poplularmovieapp.MainActivity">
 
-    <LinearLayout android:orientation="vertical"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
         <android.support.design.widget.AppBarLayout
             android:layout_width="match_parent"
@@ -25,25 +26,23 @@
 
         </android.support.design.widget.AppBarLayout>
 
-        <!--<include layout="@layout/content_main"   android:layout_width="match_parent"-->
-            <!--android:layout_height="match_parent" />-->
-
         <android.support.v7.widget.RecyclerView
-            android:layout_marginTop="@dimen/minMargin"
             android:id="@+id/recyclerview_movie"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="match_parent"
+            android:layout_marginTop="@dimen/minMargin" />
 
     </LinearLayout>
+
     <TextView
         android:id="@+id/tv_error_message_display"
+        style="@style/error_message_text_style"
         android:text="@string/error_message"
-        android:visibility="invisible"
-        style="@style/error_message_text_style" />
+        android:visibility="invisible" />
 
     <ProgressBar
         android:id="@+id/pb_loading_indicator"
-        android:visibility="invisible"
-        style="@style/loading_spinner_style" />
+        style="@style/loading_spinner_style"
+        android:visibility="invisible" />
 
 </android.support.design.widget.CoordinatorLayout>

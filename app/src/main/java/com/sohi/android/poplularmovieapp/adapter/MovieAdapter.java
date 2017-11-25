@@ -6,11 +6,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.ListView;
 
-import com.sohi.android.poplularmovieapp.NetworkUtils;
 import com.sohi.android.poplularmovieapp.R;
 import com.sohi.android.poplularmovieapp.model.MovieObj;
+import com.sohi.android.poplularmovieapp.utils.NetworkUtils;
 import com.squareup.picasso.Picasso;
 
 import java.net.URL;
@@ -21,9 +20,10 @@ import java.util.List;
  */
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapterViewHolder> {
+    private final MovieAdapterOnClickHandler mClickHanlder;
     private Context mContext;
     private List<MovieObj> movieObjs;
-    private final MovieAdapterOnClickHandler mClickHanlder;
+
     public MovieAdapter(Context mContext, MovieAdapterOnClickHandler mClickHanlder) {
         this.mContext = mContext;
         this.mClickHanlder = mClickHanlder;
@@ -52,7 +52,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
 
     @Override
     public int getItemCount() {
-        if(null == this.movieObjs) return 0;
+        if (null == this.movieObjs) return 0;
         return this.movieObjs.size();
     }
 
@@ -62,14 +62,15 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
 
     public class MovieAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public ImageView imageView;
+
         public MovieAdapterViewHolder(View itemView) {
             super(itemView);
-            imageView = (ImageView)itemView.findViewById(R.id.imageView1);
+            imageView = (ImageView) itemView.findViewById(R.id.imageView1);
             imageView.setOnClickListener(this);
             itemView.setOnClickListener(this);
         }
 
-        public void bindData(int index){
+        public void bindData(int index) {
             URL url = NetworkUtils.buildUrlForMoviePosterLarge(movieObjs.get(index).getPoster_url());
             Picasso.with(mContext).load(url.toString()).into(imageView);
             imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);

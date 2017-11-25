@@ -13,7 +13,7 @@ import static android.R.attr.version;
 public class FavMovieDbHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "favmovielist.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
 
     public FavMovieDbHelper(Context context){
@@ -30,6 +30,7 @@ public class FavMovieDbHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
         final String SQL_CREATE_WAITLIST_TABLE = "CREATE TABLE " + FavMovieContract.FavMovieEntry.TABLE_NAME + " (" +
                 FavMovieContract.FavMovieEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                FavMovieContract.FavMovieEntry.COLUMN_FAVMOVIEID + " TEXT NOT NULL, " +
                 FavMovieContract.FavMovieEntry.COLUMN_FAVMOVIEOBJ + " TEXT NOT NULL, " +
                 FavMovieContract.FavMovieEntry.COLUMN_TIMESTAMP + " TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
                 "); ";

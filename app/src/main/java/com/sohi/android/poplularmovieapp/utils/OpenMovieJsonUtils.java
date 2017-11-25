@@ -1,4 +1,4 @@
-package com.sohi.android.poplularmovieapp;
+package com.sohi.android.poplularmovieapp.utils;
 
 import android.content.Context;
 
@@ -10,15 +10,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.HttpURLConnection;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-
-import static android.R.attr.format;
 
 /**
  * Created by siav on 2/27/17.
@@ -78,7 +75,7 @@ public class OpenMovieJsonUtils {
         /* Movie information. */
         final String OWM_LIST = "results";
 
-        List<MovieObj> movieList= new ArrayList<MovieObj>();
+        List<MovieObj> movieList = new ArrayList<MovieObj>();
 
         final String OWM_Movie = "Movie";
         final String OWM_MESSAGE_CODE = "results";
@@ -102,12 +99,10 @@ public class OpenMovieJsonUtils {
             movie.setPoster_url(movieObj.getString("poster_path"));
             movie.setMovie_id(movieObj.getInt("id"));
 
-            try
-            {
+            try {
                 DateFormat format = new SimpleDateFormat("yyyy-dd-mm", Locale.ENGLISH);
                 movie.setRelease_date(format.parse(movieObj.getString("release_date")));
-            } catch (ParseException e)
-            {
+            } catch (ParseException e) {
                 e.printStackTrace();
             }
 

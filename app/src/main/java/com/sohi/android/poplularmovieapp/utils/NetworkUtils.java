@@ -1,4 +1,4 @@
-package com.sohi.android.poplularmovieapp;
+package com.sohi.android.poplularmovieapp.utils;
 
 import android.net.Uri;
 import android.support.annotation.Nullable;
@@ -13,21 +13,12 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Scanner;
 
-import static android.R.attr.apiKey;
-import static com.sohi.android.poplularmovieapp.model.AppConstants.MOVIE_ID;
-import static com.sohi.android.poplularmovieapp.model.AppConstants.MOVIE_REVIEWS_LIST_URL;
-import static com.sohi.android.poplularmovieapp.model.AppConstants.MOVIE_TRAILER_KEY_LIST_URL;
-import static com.sohi.android.poplularmovieapp.model.AppConstants.MOVIE_TRAILER_LIST_URL;
-import static com.sohi.android.poplularmovieapp.model.AppConstants.TOP_RATED_MOVIE_API_URL;
-
 /**
  * Created by siav on 2/26/17.
  */
 
 public class NetworkUtils {
     private static final String TAG = NetworkUtils.class.getSimpleName();
-//To get video link: https://api.themoviedb.org/3/movie/346364?api_key=0e45bb65283dc35b4af6519298f1fd4e&append_to_response=videos
-    // To get review: http://api.themoviedb.org/3/movie/83542/reviews?api_key=0e45bb65283dc35b4af6519298f1fd4e
 
     public static URL buildUrlForPopularMovies(String api_Key) {
         Uri builtUri = Uri.parse(AppConstants.POPLULAR_MOVIE_API_URL + api_Key).buildUpon().build();
@@ -36,7 +27,7 @@ public class NetworkUtils {
     }
 
     public static URL buildUrlForMoviesReviews(String api_Key, String id) {
-        Uri builtUri = Uri.parse(AppConstants.MOVIE_REVIEWS_LIST_URL.replace(AppConstants.MOVIE_ID,id) + api_Key).buildUpon().build();
+        Uri builtUri = Uri.parse(AppConstants.MOVIE_REVIEWS_LIST_URL.replace(AppConstants.MOVIE_ID, id) + api_Key).buildUpon().build();
 
         return getUrl(builtUri);
     }
@@ -46,8 +37,9 @@ public class NetworkUtils {
 
         return getUrl(builtUri);
     }
+
     public static URL buildUrlForMovieTrailerKey(String api_Key, String id) {
-        String url = AppConstants.MOVIE_TRAILER_KEY_LIST_URL.replace(AppConstants.MOVIE_ID,id) + api_Key;
+        String url = AppConstants.MOVIE_TRAILER_KEY_LIST_URL.replace(AppConstants.MOVIE_ID, id) + api_Key;
         Uri builtUri = Uri.parse(url).buildUpon().build();
 
         return getUrl(builtUri);
@@ -79,13 +71,19 @@ public class NetworkUtils {
         return getUrl(builtUri);
     }
 
-    public static URL buildUrlForMoviePosterMedium(String posterId){
+    public static URL buildUrlForMovieDetailsPosterLarge(String posterId) {
+        Uri builtUri = Uri.parse(AppConstants.MovieDB_Base_Url_For_Image + AppConstants.MovieDB_Image_Size_W342 + posterId).buildUpon().build();
+
+        return getUrl(builtUri);
+    }
+
+    public static URL buildUrlForMoviePosterMedium(String posterId) {
         Uri builtUri = Uri.parse(AppConstants.MovieDB_Base_Url_For_Image + AppConstants.MovieDB_Image_Size_w154 + posterId).buildUpon().build();
 
         return getUrl(builtUri);
     }
 
-    public static URL buildUrlForMoviePosterSmallOne(String posterId){
+    public static URL buildUrlForMoviePosterSmallOne(String posterId) {
         Uri builtUri = Uri.parse(AppConstants.MovieDB_Base_Url_For_Image + AppConstants.MovieDB_Image_Size_w92 + posterId).buildUpon().build();
 
         return getUrl(builtUri);

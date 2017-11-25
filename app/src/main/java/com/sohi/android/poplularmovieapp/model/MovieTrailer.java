@@ -11,6 +11,7 @@ public class MovieTrailer implements Serializable {
     private String Id;
     private String Key;
     private String DisplayText;
+    private String YoutubeURL;
 
     public MovieTrailer(int counter) {
         this.counter = counter + 1;
@@ -41,6 +42,4 @@ public class MovieTrailer implements Serializable {
     public String getYoutubeURL() {
         return this.YoutubeURL + this.getKey();
     }
-
-    private String YoutubeURL;
 }

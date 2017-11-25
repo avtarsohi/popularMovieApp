@@ -1,4 +1,8 @@
 <resources>
+
+    <!--PLEASE PROVIDE API KEY FOR MOVIE DB TO LAUNCH THIS APP-->
+    <string name="API_KEY"></string>
+
     <string name="app_name">PoplularMovieApp</string>
     <string name="sort_Popular_Movie_String">Order by popular movie</string>
     <string name="sort_Hightest_Rated_Movie_String">Order by highest-rated</string>
@@ -11,11 +15,15 @@
     <string name="plot_Title">A plot synopsis:</string>
     <string name="user_Rating">User Rating:  </string>
     <string name="release_Date">Release Date:</string>
-    <!--API KEY FOR MOVIE DB-->
-    <string name="API_KEY">0e45bb65283dc35b4af6519298f1fd4e</string>
     <string name="trailers">Trailers:</string>
     <string name="reviews">Reviews:</string>
     <string name="no_movie_available_txt">No review available for this movie</string>
     <string name="show_my_favorite_movie_list">Show my favorite movie list</string>
+    <string name="action_favorite_str">Favorite</string>
+    <string name="add_to_fav_movie_list">Add To Fav Movie List</string>
+    <string name="added_to_fav_movie_list">Added To Your Fav Movie List</string>
+    <string name="content_authority">com.sohi.android.poplularmovieapp</string>
+    <string name="movie_added_to_DB_message">Movie added to your favorite movie list</string>
+    <string name="no_internet_loading_movie_from_local_dB">Internet is not available, loading movies from local DB</string>
 
 </resources>

@@ -7,11 +7,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-
 import android.widget.TextView;
 
 import com.sohi.android.poplularmovieapp.R;
-import com.sohi.android.poplularmovieapp.model.MovieObj;
 import com.sohi.android.poplularmovieapp.model.MovieTrailer;
 
 import java.util.List;
@@ -21,9 +19,9 @@ import java.util.List;
  */
 
 public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerAdapterViewHolder> {
+    private final TrailerAdapterOnClickHandler mClickHanlder;
     private Context mContext;
     private List<MovieTrailer> movieTrailers;
-    private final TrailerAdapterOnClickHandler mClickHanlder;
 
     public TrailerAdapter(Context mContext, TrailerAdapterOnClickHandler mClickHanlder) {
         this.mContext = mContext;
@@ -53,7 +51,7 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerA
 
     @Override
     public int getItemCount() {
-        if(null == this.movieTrailers) return 0;
+        if (null == this.movieTrailers) return 0;
         return this.movieTrailers.size();
     }
 
@@ -61,9 +59,10 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerA
         void onURLClick(MovieTrailer trailer);
     }
 
-    public class TrailerAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener  {
+    public class TrailerAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public TextView textView;
         public ImageView imageView;
+
         public TrailerAdapterViewHolder(View itemView) {
             super(itemView);
             textView = (TextView) itemView.findViewById(R.id.trailerItemText);
@@ -77,14 +76,9 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerA
             imageView.setOnClickListener(this);
         }
 
-        public void bindData(int index){
-             textView.setText(movieTrailers.get(index).getDisplayText());
-//            URL url = NetworkUtils.buildUrlForReviewPosterLarge(ReviewObjs.get(index).getPoster_url());
-//            Picasso.with(mContext).load(url.toString()).into(imageView);
-//            imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-//            imageView.setAdjustViewBounds(true);
+        public void bindData(int index) {
+            textView.setText(movieTrailers.get(index).getDisplayText());
         }
-
 
         /**
          * Called when a view has been clicked.
